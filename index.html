@@ -1,0 +1,968 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f4f6f9;--card:#fff;--border:#dde3ec;--primary:#1a3a5c;--primary-fg:#fff;
+  --muted:#f1f4f8;--muted-fg:#6b7a90;--fg:#1a2535;--fg2:#4a5568;
+  --accent:#2d9ccd;--danger:#dc2626;--warn:#d97706;--success:#16a34a;
+  --sidebar:#1a3a5c;--sidebar-fg:#b8ccde;--sidebar-active:#2d9ccd;
+  --badge-green-bg:#dcfce7;--badge-green:#15803d;
+  --badge-amber-bg:#fef9c3;--badge-amber:#92400e;
+  --badge-blue-bg:#dbeafe;--badge-blue:#1e40af;
+  --badge-red-bg:#fee2e2;--badge-red:#991b1b;
+  --badge-gray-bg:#f1f5f9;--badge-gray:#475569;
+  --radius:8px;--radius-lg:12px;
+}
+body{font-family:'IBM Plex Sans',system-ui,sans-serif;background:var(--bg);color:var(--fg);font-size:14px;line-height:1.5;height:600px;overflow:hidden}
+button{font-family:inherit;cursor:pointer}
+input{font-family:inherit}
+.app{display:flex;height:600px;overflow:hidden}
+.sidebar{width:200px;background:var(--sidebar);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.header{background:var(--card);border-bottom:1px solid var(--border);padding:8px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.content{flex:1;padding:16px;overflow-y:auto}
+.page{display:none}.page.active{display:block}
+.sb-brand{padding:14px 16px 10px}
+.sb-brand-name{font-size:17px;font-weight:700;color:#fff}
+.sb-brand-sub{font-size:10px;color:var(--sidebar-fg);margin-top:1px}
+.sb-agent{padding:8px 14px 12px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:8px}
+.sb-avatar{width:30px;height:30px;border-radius:50%;background:var(--sidebar-active);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+.sb-agent-name{font-size:12px;font-weight:600;color:#fff}
+.sb-agent-role{font-size:10px;color:var(--sidebar-fg)}
+.sb-section{padding:14px 14px 3px;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--sidebar-fg)}
+.sb-item{display:flex;align-items:center;gap:8px;padding:7px 14px;font-size:12px;color:var(--sidebar-fg);border:none;background:none;width:100%;text-align:left;transition:background .15s}
+.sb-item:hover{background:rgba(255,255,255,.08);color:#fff}
+.sb-item.active{background:rgba(255,255,255,.12);color:#fff;font-weight:600}
+.sb-item svg{width:14px;height:14px;flex-shrink:0}
+.sb-badge{margin-left:auto;background:var(--sidebar-active);color:#fff;font-size:10px;font-weight:700;border-radius:10px;padding:1px 6px}
+.sb-logout{margin-top:auto;padding:8px 0 12px;border-top:1px solid rgba(255,255,255,.1)}
+.hdr-search{display:flex;align-items:center;gap:6px;background:var(--muted);border:1px solid var(--border);border-radius:var(--radius);padding:5px 10px}
+.hdr-search input{background:none;border:none;outline:none;font-size:12px;color:var(--fg);width:160px}
+.hdr-actions{display:flex;align-items:center;gap:8px}
+.hdr-icon-btn{width:30px;height:30px;border-radius:50%;border:1px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.hdr-icon-btn svg{width:14px;height:14px;stroke:var(--fg2)}
+.hdr-user{display:flex;align-items:center;gap:6px}
+.hdr-avatar{width:28px;height:28px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px}
+.stat-card{background:var(--muted);border-radius:var(--radius);padding:12px 14px}
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.two-col{display:grid;grid-template-columns:1fr 280px;gap:14px}
+.three-col{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+h1{font-size:19px;font-weight:700;color:var(--fg)}
+h2{font-size:15px;font-weight:600;color:var(--fg)}
+h3{font-size:13px;font-weight:600;color:var(--fg)}
+.muted{color:var(--muted-fg)}
+.small{font-size:12px}
+.xsmall{font-size:11px}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:var(--radius);font-size:12px;font-weight:500;border:1px solid var(--border);background:var(--card);color:var(--fg);cursor:pointer;transition:all .15s}
+.btn:hover{background:var(--muted)}
+.btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.btn-primary:hover{opacity:.9}
+.btn-danger{background:var(--danger);color:#fff;border-color:var(--danger)}
+.btn-sm{padding:3px 8px;font-size:11px;border-radius:6px}
+.btn-pill{border-radius:20px;padding:5px 16px}
+.btn-ghost{border-color:transparent;background:none}
+.btn-ghost:hover{background:var(--muted)}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-green{background:var(--badge-green-bg);color:var(--badge-green)}
+.badge-amber{background:var(--badge-amber-bg);color:var(--badge-amber)}
+.badge-blue{background:var(--badge-blue-bg);color:var(--badge-blue)}
+.badge-red{background:var(--badge-red-bg);color:var(--badge-red)}
+.badge-gray{background:var(--badge-gray-bg);color:var(--badge-gray)}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:10px;font-weight:600;color:var(--muted-fg);text-transform:uppercase;letter-spacing:.04em;padding:6px 10px;border-bottom:1px solid var(--border)}
+td{padding:8px 10px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr{transition:background .12s}
+tbody tr:hover{background:var(--muted)}
+tbody tr.clickable{cursor:pointer}
+.tbl-wrap{border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.input{padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:12px;color:var(--fg);background:var(--card);outline:none;width:100%}
+.input:focus{border-color:var(--accent)}
+.input-wrap{position:relative}
+.input-wrap svg{position:absolute;left:8px;top:50%;transform:translateY(-50%);width:13px;height:13px;stroke:var(--muted-fg);fill:none}
+.input-wrap .input{padding-left:28px}
+.tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:12px}
+.tab{padding:6px 14px;font-size:12px;font-weight:500;color:var(--muted-fg);border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer}
+.tab.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+.collapsible{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:10px}
+.collapsible-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;border:none;background:none;width:100%;text-align:left}
+.collapsible-header:hover{background:var(--muted)}
+.collapsible-body{padding:0 16px 16px;border-top:1px solid var(--border)}
+.collapse-icon{width:14px;height:14px;stroke:var(--muted-fg);transition:transform .2s;flex-shrink:0}
+.collapsed .collapse-icon{transform:rotate(-90deg)}
+.timeline-item{position:relative;padding-left:18px;padding-bottom:14px}
+.timeline-item::before{content:'';position:absolute;left:4px;top:8px;bottom:0;width:2px;background:var(--border)}
+.timeline-item:last-child::before{display:none}
+.timeline-dot{position:absolute;left:0;top:4px;width:9px;height:9px;border-radius:50%;background:var(--primary);border:2px solid var(--card)}
+.pri-high{color:var(--badge-red);background:var(--badge-red-bg);padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600}
+.pri-med{color:var(--badge-amber);background:var(--badge-amber-bg);padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600}
+.pri-low{color:var(--badge-green);background:var(--badge-green-bg);padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600}
+.qa-card{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px;border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--card);cursor:pointer;transition:all .15s;text-align:center}
+.qa-card:hover{background:var(--muted);border-color:var(--accent)}
+.qa-card svg{width:22px;height:22px;stroke:var(--primary);fill:none}
+.qa-card span{font-size:12px;font-weight:500}
+.task-card{border:1px solid var(--border);border-radius:var(--radius);padding:10px;background:var(--card);margin-bottom:8px}
+.modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;width:320px;max-width:95%}
+.cb-row{display:flex;align-items:flex-start;gap:8px}
+.cb{width:14px;height:14px;border:1.5px solid var(--border);border-radius:3px;background:var(--card);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.cb.checked{background:var(--primary);border-color:var(--primary)}
+.cb.checked::after{content:'✓';color:#fff;font-size:9px;font-weight:700}
+.breadcrumb{font-size:11px;color:var(--muted-fg);margin-bottom:3px}
+.breadcrumb span{cursor:pointer;color:var(--accent)}
+.df-row{display:flex;align-items:flex-start;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)}
+.df-row:last-child{border-bottom:none}
+.df-label{font-size:10px;font-weight:600;color:var(--muted-fg);text-transform:uppercase;letter-spacing:.04em;flex-shrink:0;width:110px}
+.df-value{font-size:11px;color:var(--fg);text-align:right}
+.banner-success{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:var(--radius);padding:10px 14px;font-size:12px;color:var(--success);display:flex;align-items:center;gap:6px}
+.banner-danger{background:#fef2f2;border:1px solid #fecaca;border-radius:var(--radius);padding:10px 14px;font-size:12px;color:var(--danger);display:flex;align-items:center;gap:6px}
+.trx-row{border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px;background:var(--card);margin-bottom:8px}
+.trx-row.selected{border-color:var(--accent);background:#f0f9ff}
+.trx-row.processed{opacity:.6;background:var(--muted)}
+.identity-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+.id-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px}
+.sep{border:none;border-top:1px solid var(--border);margin:10px 0}
+.flex{display:flex}.items-center{align-items:center}.justify-between{justify-content:space-between}
+.gap-2{gap:8px}.gap-3{gap:12px}.flex-1{flex:1}
+.mt-1{margin-top:4px}.mt-2{margin-top:8px}.mt-3{margin-top:12px}.mt-4{margin-top:16px}
+.mb-1{margin-bottom:4px}.mb-2{margin-bottom:8px}.mb-3{margin-bottom:12px}.mb-4{margin-bottom:16px}
+.text-right{text-align:right}.text-primary{color:var(--primary)}.text-danger{color:var(--danger)}.text-success{color:var(--success)}.text-warn{color:var(--warn)}
+.font-semibold{font-weight:600}.font-bold{font-weight:700}.font-medium{font-weight:500}
+.hidden{display:none!important}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0}
+.dot-red{background:var(--danger)}.dot-amber{background:var(--warn)}.dot-green{background:var(--success)}
+.wf-step{border:1px solid var(--border);border-radius:var(--radius);padding:10px 8px;min-width:80px;text-align:center;background:var(--card)}
+.pagination{display:flex;align-items:center;gap:3px;margin-top:10px;justify-content:flex-end}
+.pg-btn{padding:2px 6px;border:1px solid var(--border);border-radius:4px;font-size:11px;background:var(--card);cursor:pointer;color:var(--fg2)}
+.pg-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* Login page styles */
+.login-wrap{display:flex;height:100%}
+.login-left{width:42%;background:var(--primary);display:flex;flex-direction:column;justify-content:space-between;padding:36px}
+.login-right{flex:1;display:flex;align-items:center;justify-content:center;padding:24px}
+</style>
+
+<div class="app" id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <div class="sb-brand-name">SBank</div>
+      <div class="sb-brand-sub">Agent Portal</div>
+    </div>
+    <div class="sb-agent">
+      <div class="sb-avatar">JA</div>
+      <div>
+        <div class="sb-agent-name">Joshua Ahmed</div>
+        <div class="sb-agent-role">SBank Agent</div>
+      </div>
+    </div>
+    <nav>
+      <div class="sb-section">Workspace</div>
+      <button class="sb-item active" onclick="navigate('dashboard')">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </button>
+      <button class="sb-item" onclick="navigate('customer-search')">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Customers
+      </button>
+      <div class="sb-section">Customers</div>
+      <button class="sb-item">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+        Pending Review
+        <span class="sb-badge">3</span>
+      </button>
+      <button class="sb-item" onclick="navigate('retail')">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.58-7 8-7s8 3 8 7"/></svg>
+        Retail
+      </button>
+      <button class="sb-item" onclick="navigate('business')">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+        Business
+      </button>
+      <div class="sb-section">Operations</div>
+      <button class="sb-item"><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Applications</button>
+      <button class="sb-item"><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Products</button>
+      <button class="sb-item"><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Onboarding</button>
+      <button class="sb-item"><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>Payments</button>
+    </nav>
+    <div class="sb-logout">
+      <button class="sb-item" onclick="navigate('login')">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Log out
+      </button>
+    </div>
+  </aside>
+
+  <div class="main" id="main-area">
+    <header class="header" id="main-header">
+      <div class="hdr-search">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input class="input" placeholder="Search customers, transactions…" style="border:none;background:none;width:170px;padding:0" />
+      </div>
+      <div class="hdr-actions">
+        <button class="hdr-icon-btn">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </button>
+        <div class="hdr-user">
+          <div class="hdr-avatar">JA</div>
+          <div>
+            <div style="font-size:12px;font-weight:600">Joshua Ahmed</div>
+            <div style="font-size:10px;color:var(--muted-fg)">Agent</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- LOGIN -->
+    <div id="page-login" class="page" style="height:calc(600px - 52px)">
+      <div class="login-wrap">
+        <div class="login-left">
+          <div>
+            <div style="font-size:20px;font-weight:700;color:#fff">SBank</div>
+            <div style="font-size:10px;color:var(--sidebar-fg);margin-top:1px">Agent Portal</div>
+          </div>
+          <div>
+            <h2 style="font-size:24px;font-weight:700;color:#fff;line-height:1.3">Customer 360°<br>Management Portal</h2>
+            <p style="font-size:12px;color:var(--sidebar-fg);margin-top:10px;max-width:300px">Access customer profiles, manage onboarding workflows, and monitor compliance — all in one place.</p>
+          </div>
+          <p style="font-size:10px;color:var(--sidebar-fg)">© 2026 SBank. All rights reserved.</p>
+        </div>
+        <div class="login-right">
+          <div style="width:280px">
+            <h1 style="margin-bottom:3px">Welcome back</h1>
+            <p class="muted small mb-4">Sign in to the Agent Portal</p>
+            <div class="mb-3">
+              <label style="font-size:11px;font-weight:600;display:block;margin-bottom:3px">Employee ID</label>
+              <input class="input" placeholder="e.g. EMP-10234" />
+            </div>
+            <div class="mb-4">
+              <label style="font-size:11px;font-weight:600;display:block;margin-bottom:3px">Password</label>
+              <input class="input" type="password" placeholder="••••••••" />
+            </div>
+            <button class="btn btn-primary" style="width:100%;justify-content:center;padding:9px" onclick="navigate('dashboard')">Sign In</button>
+            <p style="font-size:10px;color:var(--muted-fg);text-align:center;margin-top:14px">Having trouble? Contact IT Support at <strong>ext. 4400</strong></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="page-dashboard" class="page active">
+      <div class="content">
+        <div class="mb-3">
+          <h1>Welcome back, Joshua</h1>
+          <p style="font-size:12px;color:var(--warn);margin-top:2px">🎉 Last week you onboarded six new customers.</p>
+        </div>
+        <div class="two-col">
+          <div>
+            <div class="three-col mb-3">
+              <div class="qa-card" onclick="navigate('customer-search')">
+                <svg viewBox="0 0 24 24" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <span>Onboard Customer</span>
+              </div>
+              <div class="qa-card">
+                <svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                <span>Subscribe to Product</span>
+              </div>
+              <div class="qa-card">
+                <svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <span>Verify Customer</span>
+              </div>
+            </div>
+            <div class="card mb-3">
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <h2>My Approval List</h2>
+                  <p class="small muted mt-1">5 pending approvals</p>
+                </div>
+                <div class="input-wrap" style="width:200px">
+                  <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                  <input class="input" placeholder="Search…" id="approval-search" oninput="renderApprovals()" />
+                </div>
+              </div>
+              <div class="tbl-wrap">
+                <table>
+                  <thead><tr><th>Reference</th><th>Client</th><th style="text-align:right">Amount</th><th>Priority</th><th>Date</th><th></th></tr></thead>
+                  <tbody id="approval-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="card">
+              <h2 class="mb-2">Customer List</h2>
+              <div class="input-wrap mb-2">
+                <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <input class="input" placeholder="Search…" id="cust-search" oninput="renderCustomers()" />
+              </div>
+              <div class="tabs">
+                <button class="tab active" onclick="setCustTab('retail',this)">Retail</button>
+                <button class="tab" onclick="setCustTab('business',this)">Business</button>
+              </div>
+              <div class="tbl-wrap">
+                <table>
+                  <thead><tr><th>Name</th><th>Email</th><th>KYC</th><th>Risk</th></tr></thead>
+                  <tbody id="cust-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="card" style="height:fit-content">
+            <h2 class="mb-2">Pending Tasks</h2>
+            <div class="tabs">
+              <button class="tab active" onclick="setTaskTab('my',this)">My tasks</button>
+              <button class="tab" onclick="setTaskTab('other',this)">Other's</button>
+            </div>
+            <div style="overflow-y:auto;max-height:380px" id="tasks-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CUSTOMER SEARCH -->
+    <div id="page-customer-search" class="page">
+      <div class="content">
+        <div class="breadcrumb mb-2"><span onclick="navigate('dashboard')">Dashboard</span> / Customer Search</div>
+        <h1 class="mb-3">Customer Search</h1>
+        <div class="card">
+          <div class="input-wrap mb-3" style="max-width:360px">
+            <svg viewBox="0 0 24 24" stroke-width="2" fill="none"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input class="input" placeholder="Search by name, ID, email or phone…" />
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Customer Name</th><th>ID</th><th>Email</th><th>Type</th><th>Risk</th><th></th></tr></thead>
+              <tbody>
+                <tr class="clickable" onclick="navigate('business')"><td class="font-semibold">Al Rashid Holdings LLC</td><td class="muted">C1001</td><td class="muted"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="472e29212807262b3526342f2e23692622">[email&#160;protected]</a></td><td><span class="badge badge-blue">Business</span></td><td><span class="badge badge-red">High</span></td><td><button class="btn btn-sm" onclick="event.stopPropagation();navigate('business')">View</button></td></tr>
+                <tr class="clickable" onclick="navigate('business')"><td class="font-semibold">Gulf Maritime Trading</td><td class="muted">C1002</td><td class="muted"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="7f100f0c3f180a1319121e0d160b16121a511c1012">[email&#160;protected]</a></td><td><span class="badge badge-blue">Business</span></td><td><span class="badge badge-amber">Medium</span></td><td><button class="btn btn-sm" onclick="event.stopPropagation();navigate('business')">View</button></td></tr>
+                <tr class="clickable" onclick="navigate('retail')"><td class="font-semibold">Hassan Al Maktoum</td><td class="muted">C5010</td><td class="muted"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5a323b29293b341a29383b343174393537">[email&#160;protected]</a></td><td><span class="badge badge-gray">Retail</span></td><td><span class="badge badge-green">Low</span></td><td><button class="btn btn-sm" onclick="event.stopPropagation();navigate('retail')">View</button></td></tr>
+                <tr class="clickable" onclick="navigate('retail')"><td class="font-semibold">Rosa Jose</td><td class="muted">C5011</td><td class="muted"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="a0d2cfd3c18ecacfd3c5e0d3c2c1cecb8ec3cfcd">[email&#160;protected]</a></td><td><span class="badge badge-gray">Retail</span></td><td><span class="badge badge-red">High</span></td><td><button class="btn btn-sm" onclick="event.stopPropagation();navigate('retail')">View</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BUSINESS CUSTOMER -->
+    <div id="page-business" class="page">
+      <div style="padding:10px 16px;background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+        <div>
+          <div class="breadcrumb"><span onclick="navigate('dashboard')">Dashboard</span> / Customers / Business / <strong>SBS Dubai</strong></div>
+          <h1 style="margin-top:3px">SBS Dubai</h1>
+        </div>
+        <div class="flex gap-2">
+          <button class="btn" onclick="navigate('dashboard')">← Back</button>
+          <button class="btn">↓ Export</button>
+        </div>
+      </div>
+      <div class="content">
+        <div class="identity-grid mb-3">
+          <div class="id-card">
+            <div class="flex items-center justify-between mb-2">
+              <span class="xsmall font-semibold muted" style="text-transform:uppercase">Business</span>
+              <div class="flex gap-2"><span class="badge badge-amber">Medium Risk</span><span class="badge badge-green">Active</span></div>
+            </div>
+            <div class="df-row"><span class="df-label">Party ID</span><span class="df-value">C1001</span></div>
+            <div class="df-row"><span class="df-label">Legal name</span><span class="df-value">SBS Dubai</span></div>
+            <div class="df-row"><span class="df-label">Type</span><span class="df-value">Juridical</span></div>
+            <div class="df-row"><span class="df-label">Country</span><span class="df-value">UAE</span></div>
+            <div class="df-row"><span class="df-label">Mobile</span><span class="df-value">+971 50 111 2222</span></div>
+            <div class="df-row"><span class="df-label">Email</span><span class="df-value"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="9af2fbe9fbf4dae9f8e9b4f9f5f7">[email&#160;protected]</a></span></div>
+          </div>
+          <div class="id-card">
+            <h3 class="mb-2">Digital Access</h3>
+            <div class="df-row"><span class="df-label">Users</span><span class="df-value">2 linked</span></div>
+            <hr class="sep">
+            <p class="xsmall font-semibold muted mb-1" style="text-transform:uppercase">Manual Review</p>
+            <div class="df-row"><span class="df-label">Basic Info</span><span class="df-value text-success">✓ Verified</span></div>
+            <div class="df-row"><span class="df-label">ID</span><span class="df-value text-success">✓ Verified</span></div>
+            <div class="df-row"><span class="df-label">Address</span><span class="df-value text-success">✓ Verified</span></div>
+          </div>
+          <div class="id-card">
+            <h3 class="mb-2">KYB</h3>
+            <div class="df-row"><span class="df-label">Status</span><span class="df-value text-success font-semibold">Verified</span></div>
+            <div class="df-row"><span class="df-label">Last review</span><span class="df-value">17 Jan 2026</span></div>
+            <div class="df-row"><span class="df-label">Next review</span><span class="df-value">17 Jan 2030</span></div>
+            <div class="df-row"><span class="df-label">Blocking</span><span class="df-value">17 Feb 2031</span></div>
+            <div class="flex gap-2 mt-2" style="justify-content:flex-end">
+              <button class="btn btn-sm">Review Date</button>
+              <button class="btn btn-sm btn-primary">Trigger KYC</button>
+            </div>
+          </div>
+        </div>
+        <div class="two-col">
+          <div>
+            <div class="collapsible" id="col-pending">
+              <button class="collapsible-header" onclick="toggleCollapsible('col-pending')">
+                <div><span style="font-weight:600;font-size:13px">Pending Transfers</span><span class="small muted" style="margin-left:8px">Awaiting approval</span></div>
+                <svg class="collapse-icon" fill="none" viewBox="0 0 24 24" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="collapsible-body" id="col-pending-body">
+                <div class="flex items-center justify-between mt-2 mb-2" id="bulk-bar">
+                  <button class="btn btn-ghost btn-sm flex items-center gap-2" onclick="toggleSelectAll()">
+                    <span id="select-all-cb" class="cb"></span>
+                    <span id="select-all-label">Select all</span>
+                  </button>
+                  <div class="flex gap-2 hidden" id="bulk-actions"></div>
+                </div>
+                <div id="pending-transfers-list"></div>
+                <div id="bulk-banner" class="hidden mt-2"></div>
+              </div>
+            </div>
+            <div class="collapsible collapsed" id="col-banking">
+              <button class="collapsible-header" onclick="toggleCollapsible('col-banking')">
+                <div><span style="font-weight:600;font-size:13px">Banking Data</span><span class="small muted" style="margin-left:8px">Accounts, cards & deposits</span></div>
+                <svg class="collapse-icon" fill="none" viewBox="0 0 24 24" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="collapsible-body hidden" id="col-banking-body">
+                <div class="tabs mt-2">
+                  <button class="tab active" onclick="setBankTab('accounts',this)">Accounts</button>
+                  <button class="tab" onclick="setBankTab('transactions',this)">Transactions</button>
+                  <button class="tab" onclick="setBankTab('cards',this)">Cards</button>
+                  <button class="tab" onclick="setBankTab('transfers',this)">Transfers</button>
+                </div>
+                <div id="bank-tab-content"></div>
+              </div>
+            </div>
+            <div class="collapsible collapsed" id="col-workflows">
+              <button class="collapsible-header" onclick="toggleCollapsible('col-workflows')">
+                <div><span style="font-weight:600;font-size:13px">Workflows & Applications</span><span class="small muted" style="margin-left:8px">Onboarding, KYC & subscriptions</span></div>
+                <svg class="collapse-icon" fill="none" viewBox="0 0 24 24" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="collapsible-body hidden" id="col-workflows-body">
+                <div id="workflows-content" class="mt-2"></div>
+              </div>
+            </div>
+            <div class="collapsible collapsed" id="col-kyc">
+              <button class="collapsible-header" onclick="toggleCollapsible('col-kyc')">
+                <div><span style="font-weight:600;font-size:13px">KYC & CDD</span><span class="small muted" style="margin-left:8px">Party-level review</span></div>
+                <svg class="collapse-icon" fill="none" viewBox="0 0 24 24" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="collapsible-body hidden" id="col-kyc-body">
+                <div class="tbl-wrap mt-2">
+                  <table><thead><tr><th>Check</th><th>Status</th><th>Date</th><th>Details</th></tr></thead>
+                  <tbody>
+                    <tr><td>Company Registration</td><td><span class="badge badge-green">Passed</span></td><td class="muted">01 Sep 2024</td><td class="muted">Trade License verified</td></tr>
+                    <tr><td>UBO Identification</td><td><span class="badge badge-green">Passed</span></td><td class="muted">01 Sep 2024</td><td class="muted">Hassan Al Maktoum (51%)</td></tr>
+                    <tr><td>Sanctions Screening</td><td><span class="badge badge-green">Passed</span></td><td class="muted">28 Feb 2025</td><td class="muted">No matches</td></tr>
+                    <tr><td>PEP Check</td><td><span class="badge badge-green">Passed</span></td><td class="muted">01 Sep 2024</td><td class="muted">Not a PEP</td></tr>
+                    <tr><td>Enhanced Due Diligence</td><td><span class="badge badge-amber">Pending</span></td><td class="muted">—</td><td class="muted">Triggered by risk profile change</td></tr>
+                    <tr><td>Periodic Review</td><td><span class="badge badge-blue">Review</span></td><td class="muted">01 Sep 2025</td><td class="muted">Annual review scheduled</td></tr>
+                  </tbody></table>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="card mb-3">
+              <div class="flex items-center justify-between mb-2">
+                <h3>Conversation notes</h3>
+                <button class="btn btn-sm btn-ghost">+ Add</button>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <p class="xsmall muted">14/07/2025</p>
+                <p class="small font-semibold">Olivia Rhye, Tatcham Branch</p>
+                <p class="small muted mt-1">Customer looking to open ISA before season closes. Shortlisted 90-day Cash ISA.</p>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <p class="xsmall muted">06/06/2024</p>
+                <p class="small font-semibold">Nancy Mayo, Call Centre ☎</p>
+                <p class="small muted mt-1">Quarterly tax credit query resolved during call.</p>
+              </div>
+              <div class="timeline-item" style="padding-bottom:0">
+                <div class="timeline-dot"></div>
+                <p class="xsmall muted">14/07/2025</p>
+                <p class="small font-semibold">Olivia Rhye, Tatcham Branch</p>
+                <p class="small muted mt-1">Welcome account created with 3.35% variable rate.</p>
+              </div>
+            </div>
+            <div class="collapsible collapsed" id="col-party">
+              <button class="collapsible-header" onclick="toggleCollapsible('col-party')">
+                <div><span style="font-weight:600;font-size:13px">Party / Customer Data</span><span class="small muted" style="margin-left:8px">Core static data</span></div>
+                <svg class="collapse-icon" fill="none" viewBox="0 0 24 24" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="collapsible-body hidden" id="col-party-body">
+                <div class="mt-2">
+                  <p class="xsmall font-semibold muted mb-1" style="text-transform:uppercase">Contact & Address</p>
+                  <div class="df-row"><span class="df-label">Reg. address</span><span class="df-value">Level 5, SBS Tower, Dubai Silicon Oasis</span></div>
+                  <div class="df-row"><span class="df-label">Main phone</span><span class="df-value">+971 4 123 4567</span></div>
+                  <div class="df-row"><span class="df-label">Generic email</span><span class="df-value"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="c2a1adacb6a3a1b682b1a0b1a6b7a0a3abeca1adaf">[email&#160;protected]</a></span></div>
+                  <hr class="sep">
+                  <p class="xsmall font-semibold muted mb-1" style="text-transform:uppercase">Customer Metadata</p>
+                  <div class="df-row"><span class="df-label">Onboarded on</span><span class="df-value">01 Sep 2024</span></div>
+                  <div class="df-row"><span class="df-label">Onboarded by</span><span class="df-value">Mehdi · Branch Dubai</span></div>
+                  <div class="df-row"><span class="df-label">Lifecycle stage</span><span class="df-value">Active · Post-onboarding</span></div>
+                  <div class="df-row"><span class="df-label">Industry</span><span class="df-value">Software & Financial Services</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RETAIL CUSTOMER -->
+    <div id="page-retail" class="page">
+      <div style="padding:10px 16px;background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div class="breadcrumb"><span onclick="navigate('dashboard')">Dashboard</span> / Customers / Retail / <strong>Hassan Al Maktoum</strong></div>
+          <h1 style="margin-top:3px">Hassan Al Maktoum</h1>
+        </div>
+        <div class="flex gap-2">
+          <button class="btn" onclick="navigate('dashboard')">← Back</button>
+          <button class="btn">↓ Export</button>
+        </div>
+      </div>
+      <div class="content">
+        <div class="identity-grid mb-3">
+          <div class="id-card">
+            <div class="flex items-center justify-between mb-2"><span class="xsmall font-semibold muted" style="text-transform:uppercase">Individual</span><div class="flex gap-2"><span class="badge badge-green">Low Risk</span><span class="badge badge-green">Active</span></div></div>
+            <div class="df-row"><span class="df-label">Party ID</span><span class="df-value">C5010</span></div>
+            <div class="df-row"><span class="df-label">Full name</span><span class="df-value">Hassan Al Maktoum</span></div>
+            <div class="df-row"><span class="df-label">DOB</span><span class="df-value">14 Mar 1985</span></div>
+            <div class="df-row"><span class="df-label">Nationality</span><span class="df-value">UAE</span></div>
+            <div class="df-row"><span class="df-label">Mobile</span><span class="df-value">+971 50 123 4567</span></div>
+            <div class="df-row"><span class="df-label">Email</span><span class="df-value"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="87efe6f4f4e6e9c7f4e5e6e9eca9e4e8ea">[email&#160;protected]</a></span></div>
+          </div>
+          <div class="id-card">
+            <h3 class="mb-2">Digital Access</h3>
+            <div class="df-row"><span class="df-label">Username</span><span class="df-value">h.almaktoum</span></div>
+            <div class="df-row"><span class="df-label">MFA</span><span class="df-value text-success">Enabled</span></div>
+            <div class="df-row"><span class="df-label">Last login</span><span class="df-value">2 hours ago</span></div>
+            <div class="df-row"><span class="df-label">Devices</span><span class="df-value">3 trusted</span></div>
+          </div>
+          <div class="id-card">
+            <h3 class="mb-2">KYC</h3>
+            <div class="df-row"><span class="df-label">Status</span><span class="df-value text-success font-semibold">Verified</span></div>
+            <div class="df-row"><span class="df-label">Last review</span><span class="df-value">07 Jan 2026</span></div>
+            <div class="df-row"><span class="df-label">Next review</span><span class="df-value">07 Jan 2030</span></div>
+            <div class="flex gap-2 mt-2" style="justify-content:flex-end"><button class="btn btn-sm btn-primary">Trigger KYC</button></div>
+          </div>
+        </div>
+        <div class="two-col">
+          <div>
+            <div class="collapsible collapsed" id="col-r-banking">
+              <button class="collapsible-header" onclick="toggleCollapsible('col-r-banking')">
+                <div><span style="font-weight:600;font-size:13px">Banking Data</span><span class="small muted" style="margin-left:8px">Accounts, cards, transactions</span></div>
+                <svg class="collapse-icon" fill="none" viewBox="0 0 24 24" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="collapsible-body hidden" id="col-r-banking-body">
+                <div class="tbl-wrap mt-2"><table><thead><tr><th>Account No</th><th>Type</th><th>Balance</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr><td class="font-semibold text-primary">123456789</td><td class="muted">Current</td><td class="font-semibold">€ 40 983</td><td><span class="badge badge-green">Active</span></td></tr>
+                  <tr><td class="font-semibold text-primary">987654321</td><td class="muted">Savings</td><td class="font-semibold">€ 92 107</td><td><span class="badge badge-green">Active</span></td></tr>
+                  <tr><td class="font-semibold text-primary">567891234</td><td class="muted">Term Deposit</td><td class="font-semibold">€ 81 300</td><td><span class="badge badge-green">Active</span></td></tr>
+                </tbody></table></div>
+              </div>
+            </div>
+            <div class="collapsible collapsed" id="col-r-kyc">
+              <button class="collapsible-header" onclick="toggleCollapsible('col-r-kyc')">
+                <div><span style="font-weight:600;font-size:13px">KYC & CDD</span><span class="small muted" style="margin-left:8px">Identity checks</span></div>
+                <svg class="collapse-icon" fill="none" viewBox="0 0 24 24" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="collapsible-body hidden" id="col-r-kyc-body">
+                <div class="tbl-wrap mt-2"><table><thead><tr><th>Check</th><th>Status</th><th>Date</th></tr></thead>
+                <tbody>
+                  <tr><td>ID Verification</td><td><span class="badge badge-green">Passed</span></td><td class="muted">07 Jan 2026</td></tr>
+                  <tr><td>Sanctions Screening</td><td><span class="badge badge-green">Passed</span></td><td class="muted">07 Jan 2026</td></tr>
+                  <tr><td>PEP Check</td><td><span class="badge badge-green">Passed</span></td><td class="muted">07 Jan 2026</td></tr>
+                  <tr><td>Source of Wealth</td><td><span class="badge badge-green">Passed</span></td><td class="muted">10 Jan 2026</td></tr>
+                </tbody></table></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="flex items-center justify-between mb-2"><h3>Conversation notes</h3><button class="btn btn-sm btn-ghost">+ Add</button></div>
+              <div class="timeline-item" style="padding-bottom:0"><div class="timeline-dot"></div><p class="xsmall muted">14/07/2025</p><p class="small font-semibold">Olivia Rhye, Tatcham Branch</p><p class="small muted mt-1">Customer enquired about premium savings. Referred to investment team.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRANSACTION DETAIL -->
+    <div id="page-transaction" class="page">
+      <div style="padding:10px 16px;background:var(--card);border-bottom:1px solid var(--border)">
+        <div class="breadcrumb" id="trx-breadcrumb"></div>
+      </div>
+      <div class="content" style="max-width:860px">
+        <button class="btn btn-ghost btn-sm mb-2" onclick="navigate('business')">← Back</button>
+        <h1 class="text-primary mb-3" id="trx-title"></h1>
+        <div class="stat-row mb-4" id="trx-stats"></div>
+        <div class="two-col">
+          <div>
+            <h2 class="mb-2">Details</h2>
+            <div class="tbl-wrap mb-4">
+              <table><thead><tr><th>Client</th><th>Initiated by</th><th>Account</th></tr></thead>
+              <tbody id="trx-details-body"></tbody></table>
+            </div>
+            <h2 class="mb-2">Supporting documents</h2>
+            <div id="trx-docs" style="border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden"></div>
+          </div>
+          <div>
+            <h2 class="mb-1">Beneficiary</h2>
+            <p class="small muted mb-2" id="trx-bene-type"></p>
+            <div class="id-card" id="trx-bene-card"></div>
+          </div>
+        </div>
+        <div id="trx-actions" class="flex gap-3 mt-4" style="justify-content:flex-end"></div>
+        <div id="trx-banner" class="mt-3"></div>
+      </div>
+    </div>
+
+    <!-- MODAL overlay (inside main, not fixed) -->
+    <div class="modal-overlay hidden" id="modal-backdrop" style="position:absolute;inset:0">
+      <div class="modal">
+        <h3 id="modal-title" class="mb-2"></h3>
+        <p id="modal-body" class="small muted mb-4"></p>
+        <div class="flex gap-3" style="justify-content:flex-end">
+          <button class="btn btn-pill" onclick="closeModal()">Cancel</button>
+          <button class="btn btn-pill" id="modal-confirm-btn"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const approvals=[
+  {id:'1',ref:'TRX-20391',client:'Al Rashid Holdings LLC',amount:'€ 42 500',amountRaw:42500,priority:'High',by:'Sara Khan',account:'123456789',date:'30/03/2026',bene:'Logistics Partner',beneType:'External transfer',reason:'Supplier payment approval',docs:['Invoice_march_2026.pdf','Board_approval_note.pdf'],status:'pending'},
+  {id:'2',ref:'TRX-20392',client:'Gulf Maritime Trading',amount:'€ 9 200',amountRaw:9200,priority:'Med',by:'Ahmad Al-Rashid',account:'987654321',date:'29/03/2026',bene:'Dubai Port Authority',beneType:'External transfer',reason:'Port fees Q1 2026',docs:['Port_fees_invoice.pdf'],status:'pending'},
+  {id:'3',ref:'TRX-20393',client:'Noor Technologies FZCO',amount:'€ 76 000',amountRaw:76000,priority:'Low',by:'Fatima Al Rashid',account:'567891234',date:'28/03/2026',bene:'Cloud Services Ltd',beneType:'External transfer',reason:'Annual license renewal',docs:['License_renewal.pdf','Contract_2026.pdf'],status:'pending'},
+  {id:'4',ref:'TRX-20564',client:'Al Rashid Holdings LLC',amount:'€ 20 000',amountRaw:20000,priority:'High',by:'User name',account:'123456789',date:'30/03/2026',bene:'Logistics Partner',beneType:'External transfer',reason:'Supplier payment approval',docs:['Invoice_march_2026.pdf','Board_approval_note.pdf'],status:'pending'},
+  {id:'5',ref:'TRX-20563',client:'Al Rashid Holdings LLC',amount:'€ 15 750',amountRaw:15750,priority:'Med',by:'User name',account:'987654321',date:'29/03/2026',bene:'Fleet Management Co',beneType:'External transfer',reason:'Vehicle lease payment',docs:['Lease_contract.pdf'],status:'pending'},
+];
+const retailCustomers=[
+  {id:'C5010',name:'Rosa Jose',email:'rosa.jose@sbank.com',kyc:'2d left',risk:'High'},
+  {id:'C5011',name:'Jonny Tribiani',email:'jonny.tribiani@sbank.com',kyc:'5d left',risk:'Medium'},
+  {id:'C5012',name:'Sarah Ali Khan',email:'skhan@sbank.com',kyc:'7d left',risk:'Low'},
+  {id:'C5013',name:'Sarah Bint Rodriguez',email:'sarah.b.r@sbank.com',kyc:'12d left',risk:'Low'},
+  {id:'C5014',name:'Amit Kumar Shah',email:'kumar.amit@sbank.com',kyc:'15d left',risk:'High'},
+  {id:'C5015',name:'Josephine J',email:'jjisephne@sbank.com',kyc:'18d left',risk:'Medium'},
+  {id:'C5016',name:'Tristan Mollant',email:'tristan.mollant@sbank.com',kyc:'20d left',risk:'Low'},
+  {id:'C5017',name:"Stephane D'suza",email:'dsuza.stephane@sbank.com',kyc:'22d left',risk:'Low'},
+  {id:'C5018',name:'Keven Pareira',email:'kevin.pareira@sbank.com',kyc:'28d left',risk:'Medium'},
+  {id:'C5019',name:'Aanaira Raj',email:'anaira.raj@sbank.com',kyc:'30d left',risk:'Low'},
+];
+const businessCustomers=[
+  {id:'C1001',name:'Al Rashid Holdings LLC',email:'info@alrashid.ae',kyc:'3d left',risk:'High'},
+  {id:'C1002',name:'Gulf Maritime Trading',email:'ops@gulfmaritime.com',kyc:'10d left',risk:'Medium'},
+  {id:'C1003',name:'Noor Technologies FZCO',email:'admin@noortech.ae',kyc:'14d left',risk:'Low'},
+  {id:'C1004',name:'Emirates Fresh Foods',email:'finance@emiratesfresh.ae',kyc:'21d left',risk:'Medium'},
+  {id:'C1005',name:'Zenith Construction LLC',email:'info@zenithcon.ae',kyc:'25d left',risk:'High'},
+];
+const tasks=[
+  {type:'Retail Onboarding',ref:'64243',customer:'John Smith Homes',agent:'Abdallah Amir Khan',days:null},
+  {type:'Subscription',ref:'74245',customer:'Monalisa Kabeer',agent:'Bobby J',days:'5d left'},
+  {type:'Business Onboarding',ref:'84242',customer:'Taimur Ali',agent:'Ronny Sharma',days:'5d left'},
+  {type:'KYC',ref:'14244',customer:'Joseph John',agent:'Alan Shaw',days:null},
+  {type:'Subscription',ref:'54243',customer:'Sushan Metari',agent:'Amir Khan',days:null},
+  {type:'Retail Onboarding',ref:'64243',customer:'Suzen Ahmed',agent:'Samuel Shroff',days:null},
+  {type:'KYB',ref:'64243',customer:'Oliver J',agent:'Oumi Alam Shaikh',days:null},
+];
+const bankAccounts=[
+  {no:'712669567664',type:'CURRENT',nick:'Basic Current Account',balance:'€ 0.00',status:'Active'},
+  {no:'575258449785',type:'CURRENT',nick:'Basic Current Account',balance:'€ 0.00',status:'Active'},
+  {no:'800444204203',type:'CURRENT',nick:'AutoProd_Label771',balance:'€ 0.00',status:'Active'},
+  {no:'307585796193',type:'SAVINGS',nick:'Saving Account ETB',balance:'ETB 0.00',status:'Active'},
+  {no:'450270614679',type:'CURRENT',nick:'Basic Current Account',balance:'€ 0.00',status:'Active'},
+];
+const bankTransactions=[
+  {id:'TXN-001',type:'Credit',desc:'Incoming Wire Transfer',amount:'€ 25,000',date:'2026-01-15',status:'Completed'},
+  {id:'TXN-002',type:'Debit',desc:'Supplier Payment #4421',amount:'€ 12,500',date:'2026-01-14',status:'Completed'},
+  {id:'TXN-003',type:'Debit',desc:'Payroll January 2026',amount:'€ 48,320',date:'2026-01-14',status:'Pending'},
+  {id:'TXN-004',type:'Credit',desc:'FX Conversion USD→ETB',amount:'ETB 150,000',date:'2026-01-13',status:'Completed'},
+];
+const bankCards=[
+  {no:'**** 7890',type:'Corporate Platinum',holder:'Ahmad Al-Rashid',expiry:'12/2028',limit:'€ 50,000',status:'Active'},
+  {no:'**** 4521',type:'Business Gold',holder:'Sara Khan',expiry:'06/2027',limit:'€ 25,000',status:'Active'},
+  {no:'**** 1133',type:'Virtual Card',holder:'SBS Dubai Ops',expiry:'03/2026',limit:'€ 10,000',status:'Blocked'},
+];
+const bankTransfers=[
+  {id:'TRF-0041',from:'712669...119630',to:'575258...456799',amount:'€ 5,000',date:'2026-01-15',status:'Completed'},
+  {id:'TRF-0039',from:'712669...119630',to:'External IBAN AE42',amount:'€ 18,750',date:'2026-01-14',status:'Pending'},
+];
+const workflows=[
+  {id:'WF-001',product:'Bank Account',name:'Manual Workflow',agent:'Joshua Ahmed',date:'12 Mar 2020',status:'completed',steps:['Basic Info','Address','Employment','Financial','ID','Tax','AML','Manual Review'],done:8},
+  {id:'WF-002',product:'Business Current Account',name:'KYB Onboarding',agent:'Mehdi Al Farsi',date:'01 Sep 2024',status:'completed',steps:['Basic Info','Business ID','UBO','AML','Sanctions','Manual Review'],done:6},
+  {id:'WF-003',product:'Trade Finance',name:'Product Subscription',agent:'Fatima Al Rashid',date:'14 Oct 2024',status:'in_progress',steps:['Basic Info','Financial','Risk Review','Compliance','Approval'],done:3},
+];
+
+let currentPage='dashboard';
+let custTab='retail';
+let bankTab='accounts';
+let approvalStatuses={};
+let selectedTrxIds=new Set();
+let currentTrxId=null;
+const C1001_APPROVALS=['4','5'];
+
+function navigate(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('active'));
+  currentPage=page;
+  const el=document.getElementById('page-'+page);
+  if(el) el.classList.add('active');
+  const map={dashboard:'Dashboard',business:'Business','customer-search':'Customers',retail:'Retail',login:'Log out'};
+  if(map[page]){
+    document.querySelectorAll('.sb-item').forEach(b=>{
+      if(b.textContent.trim().startsWith(map[page])) b.classList.add('active');
+    });
+  }
+  const sidebar=document.getElementById('sidebar');
+  const header=document.getElementById('main-header');
+  if(page==='login'){sidebar.style.display='none';header.style.display='none';}
+  else{sidebar.style.display='';header.style.display='';}
+  if(page==='dashboard'){renderApprovals();renderCustomers();renderTasks();}
+  if(page==='business'){renderPendingTransfers();renderBankTab();renderWorkflows();}
+}
+
+// Init: render dashboard data
+document.addEventListener('DOMContentLoaded',function(){renderApprovals();renderCustomers();renderTasks();});
+
+function renderApprovals(){
+  const search=(document.getElementById('approval-search')||{value:''}).value.toLowerCase();
+  const filtered=approvals.filter(a=>a.ref.toLowerCase().includes(search)||a.client.toLowerCase().includes(search));
+  const tb=document.getElementById('approval-tbody');
+  if(!tb) return;
+  tb.innerHTML=filtered.map(a=>`
+    <tr class="clickable" onclick="openTransaction('${a.id}')">
+      <td class="font-semibold text-primary">${a.ref}</td>
+      <td class="muted">${a.client}</td>
+      <td style="text-align:right;font-weight:600">${a.amount}</td>
+      <td><span class="pri-${a.priority.toLowerCase()}">${a.priority}</span></td>
+      <td class="muted small">${a.date}</td>
+      <td><button class="btn btn-sm" onclick="event.stopPropagation();openTransaction('${a.id}')">···</button></td>
+    </tr>`).join('');
+}
+
+function renderCustomers(){
+  const search=(document.getElementById('cust-search')||{value:''}).value.toLowerCase();
+  const list=custTab==='retail'?retailCustomers:businessCustomers;
+  const filtered=list.filter(c=>c.name.toLowerCase().includes(search)||c.email.toLowerCase().includes(search));
+  const rb={High:'badge-red',Medium:'badge-amber',Low:'badge-green'};
+  const tb=document.getElementById('cust-tbody');
+  if(!tb) return;
+  tb.innerHTML=filtered.map(c=>`
+    <tr class="clickable" onclick="navigate('${custTab==='retail'?'retail':'business'}')">
+      <td class="font-semibold">${c.name}</td>
+      <td class="muted">${c.email}</td>
+      <td><span class="flex items-center gap-2"><span class="dot ${parseInt(c.kyc)<=7?'dot-red':'dot-amber'}"></span>${c.kyc}</span></td>
+      <td><span class="badge ${rb[c.risk]}">${c.risk}</span></td>
+    </tr>`).join('');
+}
+
+function setCustTab(t,btn){
+  custTab=t;
+  btn.closest('.tabs').querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCustomers();
+}
+
+function setTaskTab(t,btn){
+  btn.closest('.tabs').querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function renderTasks(){
+  const el=document.getElementById('tasks-list');
+  if(!el) return;
+  el.innerHTML=tasks.map(t=>`
+    <div class="task-card">
+      <div class="flex items-center justify-between mb-1">
+        <span class="small font-semibold">${t.type} - ${t.ref}</span>
+        ${t.days?`<span class="small text-danger">${t.days}`:''}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:11px;color:var(--muted-fg)">
+        <div>Customer: <strong style="color:var(--fg)">${t.customer}</strong></div>
+        <div>Agent: <strong style="color:var(--fg)">${t.agent}</strong></div>
+      </div>
+    </div>`).join('');
+}
+
+function openTransaction(id){
+  const a=approvals.find(x=>x.id===id);
+  if(!a) return;
+  currentTrxId=id;
+  document.getElementById('trx-breadcrumb').innerHTML=`<span onclick="navigate('dashboard')">Dashboard</span> / <span onclick="navigate('business')">${a.client}</span> / ${a.ref}`;
+  document.getElementById('trx-title').textContent=a.ref;
+  const status=approvalStatuses[id];
+  const sb=status==='approved'?'badge-green':status==='rejected'?'badge-red':'badge-amber';
+  const sl=status?(status==='approved'?'Approved':'Rejected'):'Pending';
+  document.getElementById('trx-stats').innerHTML=`
+    <div class="stat-card" style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;text-align:center"><div class="label" style="font-size:11px;color:var(--muted-fg)">Reference</div><div style="font-size:15px;font-weight:700">${a.ref}</div></div>
+    <div class="stat-card" style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;text-align:center"><div class="label" style="font-size:11px;color:var(--muted-fg)">Amount</div><div style="font-size:15px;font-weight:700">${a.amount}</div></div>
+    <div class="stat-card" style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;text-align:center"><div class="label" style="font-size:11px;color:var(--muted-fg)">Status</div><div class="mt-1"><span class="badge ${sb}">${sl}</span></div></div>`;
+  document.getElementById('trx-details-body').innerHTML=`<tr><td class="font-bold" style="font-size:11px;text-transform:uppercase;letter-spacing:.04em">${a.client.split(' ').slice(0,2).join(' ')}</td><td class="muted">${a.by}</td><td><span class="flex items-center gap-2"><span class="font-semibold">${a.account}</span><span class="badge badge-green">Active</span></span></td></tr>`;
+  document.getElementById('trx-docs').innerHTML=a.docs.map(d=>`<button style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;font-size:12px;font-weight:500;border:none;background:var(--muted);cursor:pointer;border-bottom:1px solid var(--border);text-align:left">${d}<svg style="width:12px;height:12px;stroke:var(--muted-fg);fill:none" viewBox="0 0 24 24" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>`).join('');
+  document.getElementById('trx-bene-type').textContent=a.beneType;
+  document.getElementById('trx-bene-card').innerHTML=`<p class="xsmall font-bold mb-1" style="text-transform:uppercase">${a.bene}</p><p class="small muted">Date: ${a.date}</p><p class="small muted">Reason: ${a.reason}</p>`;
+  const actEl=document.getElementById('trx-actions');
+  if(status){
+    actEl.innerHTML='';
+    document.getElementById('trx-banner').innerHTML=status==='approved'
+      ?`<div class="banner-success"><span class="dot dot-green"></span>Transaction approved. Action logged.</div>`
+      :`<div class="banner-danger"><span class="dot dot-red"></span>Transaction rejected. Action logged.</div>`;
+  } else {
+    document.getElementById('trx-banner').innerHTML='';
+    actEl.innerHTML=`<button class="btn btn-pill" onclick="showSingleConfirm('${id}','reject')">Reject</button><button class="btn btn-pill btn-primary" onclick="showSingleConfirm('${id}','approve')">Approve</button>`;
+  }
+  navigate('transaction');
+}
+
+function renderPendingTransfers(){
+  const list=document.getElementById('pending-transfers-list');
+  if(!list) return;
+  const relevant=approvals.filter(a=>C1001_APPROVALS.includes(a.id));
+  list.innerHTML=relevant.map(a=>{
+    const status=approvalStatuses[a.id];
+    const isSel=selectedTrxIds.has(a.id);
+    if(status) return `<div class="trx-row processed"><div class="flex items-center justify-between"><span class="font-semibold">${a.ref}</span><span class="badge ${status==='approved'?'badge-green':'badge-red'}">${status==='approved'?'Approved':'Rejected'}</span></div><span class="small muted">${a.amount}</span></div>`;
+    return `<div class="trx-row ${isSel?'selected':''}">
+      <div class="cb-row">
+        <span class="cb ${isSel?'checked':''}" onclick="toggleTrxSelect('${a.id}')"></span>
+        <div style="flex:1">
+          <div class="flex items-center justify-between mb-1">
+            <button class="btn btn-ghost" style="padding:0;font-size:12px;font-weight:600;color:var(--primary)" onclick="openTransaction('${a.id}')">${a.ref}</button>
+            <span class="pri-${a.priority.toLowerCase()}">${a.priority} priority</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;font-size:11px;color:var(--muted-fg);margin-bottom:8px">
+            <div>Amount: <strong style="color:var(--fg)">${a.amount}</strong></div>
+            <div>By: <strong style="color:var(--fg)">${a.by}</strong></div>
+            <div>Date: <strong style="color:var(--fg)">${a.date}</strong></div>
+          </div>
+          <div class="flex gap-2 items-center">
+            <button class="btn btn-sm btn-pill" style="border-color:#fca5a5;color:var(--danger)" onclick="showSingleConfirm('${a.id}','reject')">Reject</button>
+            <button class="btn btn-sm btn-pill btn-primary" onclick="showSingleConfirm('${a.id}','approve')">Sign & Approve</button>
+            <button class="btn btn-sm btn-ghost" style="font-size:11px;text-decoration:underline" onclick="openTransaction('${a.id}')">View details</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  updateBulkBar();
+}
+
+function toggleTrxSelect(id){
+  if(selectedTrxIds.has(id)) selectedTrxIds.delete(id);
+  else selectedTrxIds.add(id);
+  renderPendingTransfers();
+}
+
+function toggleSelectAll(){
+  const pending=approvals.filter(a=>C1001_APPROVALS.includes(a.id)&&!approvalStatuses[a.id]);
+  const allSel=pending.length>0&&pending.every(a=>selectedTrxIds.has(a.id));
+  if(allSel) selectedTrxIds.clear();
+  else pending.forEach(a=>selectedTrxIds.add(a.id));
+  renderPendingTransfers();
+}
+
+function updateBulkBar(){
+  const n=selectedTrxIds.size;
+  const lbl=document.getElementById('select-all-label');
+  const actions=document.getElementById('bulk-actions');
+  const cb=document.getElementById('select-all-cb');
+  const pending=approvals.filter(a=>C1001_APPROVALS.includes(a.id)&&!approvalStatuses[a.id]);
+  const allSel=pending.length>0&&pending.every(a=>selectedTrxIds.has(a.id));
+  if(lbl) lbl.textContent=n>0?`${n} selected`:'Select all';
+  if(cb){cb.className='cb'+(allSel?' checked':'');}
+  if(actions){
+    actions.classList.toggle('hidden',n===0);
+    actions.innerHTML=n>0?`<button class="btn btn-sm" style="border-color:#fca5a5;color:var(--danger)" onclick="showBulkConfirm('reject')">Reject ${n}</button><button class="btn btn-sm btn-primary" onclick="showBulkConfirm('approve')">Approve ${n}</button>`:'';
+  }
+}
+
+function setBankTab(t,btn){
+  bankTab=t;
+  btn.closest('.tabs').querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderBankTab();
+}
+
+function renderBankTab(){
+  const el=document.getElementById('bank-tab-content');
+  if(!el) return;
+  const bs=s=>s==='Active'?'badge-green':s==='Blocked'?'badge-red':'badge-amber';
+  if(bankTab==='accounts'){
+    el.innerHTML=`<div class="tbl-wrap mt-2"><table><thead><tr><th>Account No</th><th>Type</th><th>Nickname</th><th style="text-align:right">Balance</th><th>Status</th></tr></thead><tbody>${bankAccounts.map(a=>`<tr><td class="font-semibold text-primary">${a.no}</td><td class="muted">${a.type}</td><td class="muted">${a.nick}</td><td style="text-align:right;font-weight:600">${a.balance}</td><td><span class="badge ${bs(a.status)}">${a.status}</span></td></tr>`).join('')}</tbody></table></div>`;
+  } else if(bankTab==='transactions'){
+    el.innerHTML=`<div class="tbl-wrap mt-2"><table><thead><tr><th>ID</th><th>Type</th><th>Description</th><th style="text-align:right">Amount</th><th>Date</th><th>Status</th></tr></thead><tbody>${bankTransactions.map(t=>`<tr><td class="text-primary font-semibold">${t.id}</td><td class="muted">${t.type}</td><td class="muted">${t.desc}</td><td style="text-align:right;font-weight:600">${t.amount}</td><td class="muted">${t.date}</td><td><span class="badge ${bs(t.status)}">${t.status}</span></td></tr>`).join('')}</tbody></table></div>`;
+  } else if(bankTab==='cards'){
+    el.innerHTML=`<div class="tbl-wrap mt-2"><table><thead><tr><th>Card No</th><th>Type</th><th>Holder</th><th>Expiry</th><th style="text-align:right">Limit</th><th>Status</th></tr></thead><tbody>${bankCards.map(c=>`<tr><td class="font-semibold">${c.no}</td><td class="muted">${c.type}</td><td class="muted">${c.holder}</td><td class="muted">${c.expiry}</td><td style="text-align:right">${c.limit}</td><td><span class="badge ${bs(c.status)}">${c.status}</span></td></tr>`).join('')}</tbody></table></div>`;
+  } else if(bankTab==='transfers'){
+    el.innerHTML=`<div class="tbl-wrap mt-2"><table><thead><tr><th>ID</th><th>From</th><th>To</th><th style="text-align:right">Amount</th><th>Date</th><th>Status</th></tr></thead><tbody>${bankTransfers.map(t=>`<tr><td class="text-primary font-semibold">${t.id}</td><td class="muted small">${t.from}</td><td class="muted small">${t.to}</td><td style="text-align:right;font-weight:600">${t.amount}</td><td class="muted">${t.date}</td><td><span class="badge ${bs(t.status)}">${t.status}</span></td></tr>`).join('')}</tbody></table></div>`;
+  }
+}
+
+function renderWorkflows(){
+  const el=document.getElementById('workflows-content');
+  if(!el) return;
+  const sm={completed:{badge:'badge-green',label:'Completed'},in_progress:{badge:'badge-blue',label:'In Progress'},pending:{badge:'badge-amber',label:'Pending'}};
+  el.innerHTML=workflows.map(wf=>`
+    <div class="collapsible collapsed mb-2" id="wf-${wf.id}">
+      <button class="collapsible-header" onclick="toggleCollapsible('wf-${wf.id}')">
+        <div><p class="font-semibold">${wf.product}</p><p class="small muted mt-1">Workflow: ${wf.name} · Agent: ${wf.agent} · ${wf.date}</p></div>
+        <div class="flex gap-2 items-center">
+          <span class="badge ${sm[wf.status].badge}">${sm[wf.status].label}</span>
+          <button class="btn btn-sm" onclick="event.stopPropagation()">Reject</button>
+          <button class="btn btn-sm btn-primary" onclick="event.stopPropagation()">Approve</button>
+          <svg class="collapse-icon" fill="none" viewBox="0 0 24 24" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </button>
+      <div class="collapsible-body hidden" id="wf-${wf.id}-body">
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">
+          ${wf.steps.map((s,i)=>`<div class="wf-step">${i<wf.done?`<svg style="width:20px;height:20px;fill:none;stroke:var(--success)" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="9 12 12 15 16 9"/></svg>`:`<svg style="width:20px;height:20px;fill:none;stroke:var(--border)" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>`}<p class="xsmall font-semibold">${s}</p></div>`).join('')}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleCollapsible(id){
+  const el=document.getElementById(id);
+  const body=document.getElementById(id+'-body');
+  if(!el||!body) return;
+  el.classList.toggle('collapsed');
+  body.classList.toggle('hidden');
+}
+
+function showSingleConfirm(id,action){
+  const a=approvals.find(x=>x.id===id);
+  const isApprove=action==='approve';
+  document.getElementById('modal-title').textContent=isApprove?'Approve transaction?':'Reject transaction?';
+  document.getElementById('modal-body').textContent=isApprove?`Approve ${a.ref} for ${a.amount}? This cannot be undone.`:`Reject ${a.ref} for ${a.amount}? Please confirm.`;
+  const btn=document.getElementById('modal-confirm-btn');
+  btn.textContent=isApprove?'Approve':'Reject';
+  btn.className=`btn btn-pill ${isApprove?'btn-primary':'btn-danger'}`;
+  btn.onclick=()=>executeSingle(id,action);
+  document.getElementById('modal-backdrop').classList.remove('hidden');
+}
+
+function showBulkConfirm(action){
+  const n=selectedTrxIds.size;
+  const isApprove=action==='approve';
+  document.getElementById('modal-title').textContent=isApprove?`Approve ${n} transactions?`:`Reject ${n} transactions?`;
+  document.getElementById('modal-body').textContent=`You are about to ${action} ${n} transaction${n>1?'s':''} in bulk. This cannot be undone.`;
+  const btn=document.getElementById('modal-confirm-btn');
+  btn.textContent=isApprove?`Approve ${n}`:`Reject ${n}`;
+  btn.className=`btn btn-pill ${isApprove?'btn-primary':'btn-danger'}`;
+  btn.onclick=()=>executeBulk(action);
+  document.getElementById('modal-backdrop').classList.remove('hidden');
+}
+
+function closeModal(){document.getElementById('modal-backdrop').classList.add('hidden');}
+
+function executeSingle(id,action){
+  approvalStatuses[id]=action;
+  closeModal();
+  renderPendingTransfers();
+}
+
+function executeBulk(action){
+  selectedTrxIds.forEach(id=>{ approvalStatuses[id]=action; });
+  selectedTrxIds.clear();
+  closeModal();
+  renderPendingTransfers();
+}
+</script>
